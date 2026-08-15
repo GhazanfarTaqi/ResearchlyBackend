@@ -110,11 +110,11 @@ graph.add_edge(START, "get_papers")
 graph.add_edge("get_papers", "research")
 graph.add_edge("research", END)
 
-research_pipeline = graph.compile()
+researchApp = graph.compile()
 
-response = research_pipeline.invoke({
-    "topic":"AI in healthcare"
-})
+# response = research_pipeline.invoke({
+#     "topic":"AI in healthcare"
+# })
 
-print("RESEARCH REPORT \n")
-print(response["report"])
+# print("RESEARCH REPORT \n")
+# print(response["report"])
