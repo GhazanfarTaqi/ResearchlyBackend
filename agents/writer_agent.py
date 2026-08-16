@@ -18,7 +18,7 @@ class State(TypedDict):
     topic:str
     papers:list[dict]
     paper_chunks:list[dict]
-    research_notes = list[dict]
+    research_notes: list[dict]
     scraped_papers: list[dict]
     starter_manuscript: str
 
@@ -679,10 +679,10 @@ def makeChunks(state:State):
     papers = state['papers']
     topic = state['topic']
     paper_chunks = []
-    print(state)
+    # print(state)
     for paper in scraped_papers:
         if paper['local_path']:
-            path = paper['local_path'].replace('\\', "", 1)          
+            path = paper['local_path'].replace('\\', "/")          
             loader = PyPDFLoader(paper['local_path'])
             doc = loader.load()
 
@@ -722,14 +722,21 @@ def makeNotes(state:State):
         chunks = paper['chunks']
         chunk_notes= []
         for chunk in chunks:
-            chunk_prompt = chunk_analyzer_prompt({"paper_title":title, "chunk":chunk})
+            chunk_prompt = chunk_analyzer_prompt.invoke({"topic":topic, "paper_title":title, "chunk":chunk})
             response = notes_agent.invoke(chunk_prompt)
             chunk_notes.append(response.content)
         
-        summarized_paper_chunks.append({"title":title, "doi":paper['doi'],"summarized_chunks":chunk_notes})
+        summarized_paper_chunks.append({
+            "title":title, 
+            "doi":paper['doi'],
+            "summarized_chunks":chunk_notes, 
+            "year":paper['year'],  
+            "authors":paper['authors'],
+            "url":paper['url']
+            })
     
     for paper in summarized_paper_chunks:
-        synthesis_prompt = PAPER_SYNTHESIS_PROMPT({
+        synthesis_prompt = PAPER_SYNTHESIS_PROMPT.invoke({
             "topic":topic,
             "paper_metadata":{
                 "title":paper['title'],
@@ -749,15 +756,17 @@ def makeNotes(state:State):
                 "url":paper['url'],
                 "notes":response.content
             })
-        
+    
+    print("research_notes", research_notes)
     return {"research_notes":research_notes}
 
 def makeStaterTempelate(state:State):
+    print(f"State In MakeStaterTemplate {list(state.keys())}")
     research_context = state['research_notes']
     topic = state['topic']
     references = state['papers']
 
-    stater_template_prompt = STARTER_MANUSCRIPT_PROMPT({
+    stater_template_prompt = STARTER_MANUSCRIPT_PROMPT.invoke({
         "topic":topic,
         "research_context":research_context,
         "references":references
