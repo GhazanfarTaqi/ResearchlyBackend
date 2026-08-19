@@ -17,6 +17,7 @@ dependencies = [
     "langchain-text-splitters>=1.1.2",
     "langgraph>=1.2.10",
     "pydantic>=2.13.4",
+    "pymongo>=4.17.0",
     "pypaperbot>=1.4.1",
     "pypdf>=6.15.0",
     "python-dotenv>=1.2.2",
