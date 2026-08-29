@@ -6,6 +6,8 @@ from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, START, END
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from db import isPaperInDb, insert_paper
+from vector_db import add_paper_to_vector_store
 from dotenv import load_dotenv
 from rich import print
 import os
@@ -690,6 +692,10 @@ def makeChunks(state:State):
             chunks = splitter.split_documents(doc)
 
             # todo:connect vector store pipline here
+            if not isPaperInDb(paper['doi']):
+                insert_paper(paper)
+                add_paper_to_vector_store(chunks)
+
             paper_chunks.append({
                 "title":paper['title'],
                 "authors":paper['authors'],

@@ -10,3 +10,4 @@ wheels/
 .venv
 .env
 paper
+chroma_langchain_db
