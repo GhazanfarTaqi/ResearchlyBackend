@@ -1,9 +1,18 @@
 from langchain.tools import tool
 from agents.research_agent import researchApp
 from agents.rag_agent import  ask_model
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
+# Initialize the ChatGPT model
+llm = ChatGroq(model="openai/gpt-oss-120b")
 
+# Invoke the model with a message
+result = llm.invoke("Hello, how can you help me today?")
+print(result.content)
 
 
 
