@@ -4,11 +4,12 @@ from tool.research_tool import get_research_data
 from langgraph.graph.message import add_messages
 from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, START, END
-
+from langchain_groq import ChatGroq
 
 tools = [get_research_data]
 
-researh_agent = ChatMistralAI(model = "mistral-large-latest", temperature = 0.7)
+# researh_agent = ChatMistralAI(model = "mistral-medium-latest", temperature = 0.7)
+researh_agent = ChatGroq(model = "openai/gpt-oss-20b", temperature = 0.7)
 
 
 class State():

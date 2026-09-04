@@ -2,19 +2,19 @@ from langchain.tools import tool
 from agents.research_agent import researchApp
 from agents.rag_agent import  ask_model
 from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
-
-# Load environment variables from .env file
+from langgraph.prebuilt import ToolNode
+from langgraph.graph import StateGraph, END, START
+from typing import TypedDict, Annotated, List
+import operator
 load_dotenv()
 
-# Initialize the ChatGPT model
+
 llm = ChatGroq(model="openai/gpt-oss-120b")
 
-# Invoke the model with a message
-result = llm.invoke("Hello, how can you help me today?")
-print(result.content)
-
-
+class AgentState(TypedDict):
+    messages: Annotated[List, operator.add]
 
 @tool
 def rag_search(query: str) -> str:
@@ -66,7 +66,7 @@ def research_topic(topic: str) -> str:
         information from relevant sources and source references or links when
         available from the underlying research pipeline.
     """
-    return researchApp(topic)
+    return researchApp.invoke({"topic": topic})
 
 
 #Leaving this tool for now will implement a more robust version later. The current implementation is a placeholder and may not fully meet the intended functionality.
@@ -95,5 +95,56 @@ def write_document(instructions: str) -> str:
         A structured and polished written document generated according to the
         supplied instructions and available research context.
     """
-    return write_document(instructions)
+    return write_document.invoke(instructions)
 
+tools = [rag_search, research_topic]
+
+llm_with_tools = llm.bind_tools(tools)
+
+
+tool_node = ToolNode(tools)
+
+def call_model(state:AgentState):
+    messages = state['messages']
+    response = llm_with_tools.invoke(messages)
+    return {"messages": [response]}
+
+def should_continue(state: AgentState) -> str:
+    last_message = state["messages"][-1]
+    if last_message.tool_calls:
+        return "tools"
+    return "end"
+
+
+workflow = StateGraph(AgentState)
+workflow.add_node("model", call_model)
+workflow.add_node("tools", tool_node)
+
+workflow.add_edge(START, "model")
+workflow.add_conditional_edges("model", should_continue, {"tools": "tools", "end": END})
+workflow.add_edge("tools", "model")
+
+app = workflow.compile()
+
+
+
+def run_agent(query: str):
+    """Run the agent with a given query."""
+    initial_state = {
+        "messages": [HumanMessage(content=query)]
+    }
+    
+    result = app.invoke(initial_state)
+    return result["messages"][-1].content
+
+# Example usage
+if __name__ == "__main__":
+    # Test the agent
+    queries = [
+        "how ai is used in healthcare?",
+    ]
+    
+    for query in queries:
+        print(f"Query: {query}")
+        print(f"Response: {run_agent(query)}")
+        print("-" * 50)
