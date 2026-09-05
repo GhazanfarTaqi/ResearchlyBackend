@@ -69,7 +69,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://researchlyfrontend.vercel.app/"
+        "https://researchlyfrontend.vercel.app"
         # Add Vercel URL after deploying frontend
         # "https://researchly.vercel.app",
     ],
