@@ -1,9 +1,16 @@
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+# from langchain_huggingface import HuggingFaceEmbeddings
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 
-embeddings = HuggingFaceEmbeddings(model_name = "sentence-transformers/all-MiniLM-L6-v2")
-
+embeddings = HuggingFaceEndpointEmbeddings(
+    model="sentence-transformers/all-MiniLM-L6-v2",
+    task="feature-extraction",
+    huggingfacehub_api_token=os.environ["HF_TOKEN"],
+)
 vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory="./chroma_langchain_db"
