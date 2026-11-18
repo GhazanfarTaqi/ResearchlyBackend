@@ -1,4 +1,4 @@
-from database.connection import connectdb
+from .connection import connectdb
 
 
 sample_paper = {

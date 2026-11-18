@@ -1,6 +1,6 @@
 from langchain.tools import tool
-from agents.research_agent import researchApp
-from agents.rag_agent import  ask_model
+from .research_agent import researchApp
+from .rag_agent import  ask_model
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
@@ -128,13 +128,13 @@ app = workflow.compile()
 
 
 
-def run_agent(query: str):
+def run_agent(conversation: list):
     """Run the agent with a given query."""
-    initial_state = {
-        "messages": [HumanMessage(content=query)]
+    context = {
+        "messages": conversation
     }
     
-    result = app.invoke(initial_state)
+    result = app.invoke(context)
     return result["messages"][-1].content
 
 # Example usage
