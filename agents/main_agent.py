@@ -2,7 +2,7 @@ from langchain.tools import tool
 from .research_agent import researchApp
 from .rag_agent import  ask_model
 from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode
 from langgraph.graph import StateGraph, END, START
@@ -130,8 +130,19 @@ app = workflow.compile()
 
 def run_agent(conversation: list):
     """Run the agent with a given query."""
+    messages = []
+    for message in conversation:
+        content = message.get("content", "") if isinstance(message, dict) else str(message)
+        role = message.get("role", "").lower() if isinstance(message, dict) else "human"
+        if role in ("ai", "assistant"):
+            messages.append(AIMessage(content=content))
+        elif role in ("system",):
+            messages.append(SystemMessage(content=content))
+        else:
+            messages.append(HumanMessage(content=content))
+
     context = {
-        "messages": conversation
+        "messages": messages
     }
     
     result = app.invoke(context)
