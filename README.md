@@ -401,6 +401,29 @@ Before production launch:
 4. Set production Clerk keys rather than development keys.
 5. Configure monitoring and provider usage limits.
 
+## Diagnosing deployment 500 errors
+
+Check these public and secret-safe endpoints:
+
+* `GET https://researchlyfrontend.vercel.app/api/status`
+* `GET https://researchlybackend.onrender.com/health`
+
+The frontend status endpoint reports only environment-variable presence and
+backend reachability. Configure these Vercel environment variables and redeploy:
+
+* `BACKEND_API_URL=https://researchlybackend.onrender.com`
+* `INTERNAL_API_KEY=<same value as the backend>`
+* `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<production publishable key>`
+* `CLERK_SECRET_KEY=<production secret key>`
+* `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`
+* `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/`
+
+Configure these Render variables:
+
+* `INTERNAL_API_KEY=<same value as Vercel>`
+* `CORS_ALLOWED_ORIGINS=https://researchlyfrontend.vercel.app`
+* The MongoDB and AI provider variables listed above
+
 Provider libraries normally read their API keys from their standard
 environment-variable names. Never commit `.env` or downloaded papers; both
 are ignored by the backend Git configuration.

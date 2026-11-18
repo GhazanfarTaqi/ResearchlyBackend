@@ -18,7 +18,7 @@ app = FastAPI(
 
 configured_origins = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:3000",
+    "http://localhost:3000,https://researchlyfrontend.vercel.app",
 ).split(",")
 
 app.add_middleware(
