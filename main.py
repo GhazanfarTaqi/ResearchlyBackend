@@ -87,7 +87,8 @@ def health():
     try:
         from database.connection import connectdb
 
-        connectdb("admin").admin.command("ping")
+        client = connectdb("admin").client
+        client.admin.command("ping")
         return {"status": "ok", "database": "connected"}
     except Exception as exc:
         logger.error("Database health check failed: %s", exc)
